@@ -1,0 +1,95 @@
+---
+title: "Assignment Part III"
+author: "Silpa Soni Nallacheruvu (19980824-5287)"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+set.seed()
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE}
+source("../Codes/Functions.R")
+code <- readLines("codes_assignment_3.R")
+eval(parse(text = code[6:100]))
+```
+
+# Summary
+
+
+# Task 1
+
+## Approach :
+
+
+## Code :
+
+```{r echo=TRUE}
+# ---- Task_1 ----
+
+
+
+```
+
+## Output :
+
+
+```{r}
+
+```
+
+## Observation :
+
+# Task 2
+
+## Approach :
+
+
+
+## Code :
+
+```{r echo=TRUE}
+# ---- Task_2 ----
+
+
+```
+
+## Output :
+
+
+
+```{r}
+
+```
+
+## Observation :
+
+
+# Task 3
+
+## Approach :
+
+
+
+## Code :
+
+```{r echo=TRUE}
+# ---- Task_3 ----
+
+
+```
+
+## Output :
+
+
+
+```{r}
+
+```
+
+## Observation :
+
+
