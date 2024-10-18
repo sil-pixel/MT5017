@@ -1,0 +1,135 @@
+---
+title: "Assignment Part I"
+author: "Silpa Soni Nallacheruvu (19980824-5287), Elva Wallimann (19780306-T063)"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+set.seed(900101)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Summary
+
+The Assignment focuses on applying knowledge related to Maximum Likelihood Estimate, Logistic Regression using the Newton-Raphson's Algorithm. The first task is about deriving parameter estimates using score vector and Fisher Information Matrix iteratively until convergence is achieved. The second task is about verifying the accuracy of the NR algorithm against the built-in R's results of the same estimates. The third task is about calculating the standard errors from the MLE and verifying the consistency of the usage of the Fisher Information Matrix. The fourth task is introducing bootstrapping samples to approximate the estimates and constructing confidence interval for a requested use case. We have seen that the NR algorithm and the bootstrap approximations are consistent with the built-in R results.
+
+# Task 1
+
+## Approach :
+
+We first define functions for the likelihood (L), log-likelihood (l), score function (S), and the Fisher information (I), as specified in the task description. Then we use the defined functions to build a function (NR) for the Newton-Raphson's algorithm to compute the ML-estimates in a logistic regression model.
+
+## Code :
+
+```{r echo=FALSE}
+code <- readLines("computer_assignment_1.R")
+task1_code <- code[12:71]
+eval(parse(text = task1_code))
+cat(task1_code, sep = "\n")
+```
+
+# Task 2
+
+## Approach :
+
+We verified our function NR from task 1 by re-computing the parameter estimates provided by R (R actually uses the same type of algorithm). We first imported data from <https://raw.githubusercontent.com/mskoldSU/MT5003_HT17/master/Projekt/proj_data.csv> and set random seed to 900101 to sample 1000 entries. Then, we estimate a logistic regression model using the embeded glm() function in R and the imported data. The resulted coefficients (the parameter $\theta$ for the logistic regression model) are taken for comparison with what we will manually calculated in the following codes. It takes four iterations for the glm() model to converge. Subsequently, we supplied the starting value theta0 = c(0, 0, 0, 0), along with the imported data, to the NR() function that we have built.
+
+## Code :
+
+```{r echo=FALSE}
+task2_code <- code[73:99]
+cat(task2_code, sep = "\n")
+invisible(capture.output(eval(parse(text = code[74:90])), file = NULL))
+```
+
+## Output :
+
+We started from doing four iterations as what R needs, and the results are exactly same as the estimates from R (with eight digits of accuracy). 
+
+```{r, echo=FALSE}
+eval(parse(text = code[92:93]))
+compare_theta4
+```
+
+So, we reduce the iteration to three to see the minimum sufficiency. The result is still very good. 
+```{r, echo=FALSE}
+eval(parse(text = code[95:96]))
+compare_theta3
+```
+
+We then further reduced the number of the iteration to two, the result looks like the following: 
+```{r, echo=FALSE}
+eval(parse(text = code[98:99]))
+compare_theta2
+```
+
+## Observation :
+
+Other than the coefficient for "KonMan", the rest have still two digits of accuracy. But, for all coefficients to have two digits of accuracy, we keep the number of iteration to three.
+
+# Task 3
+
+## Approach :
+
+To calculate the standard errors from the ML estimates, the formula $\sqrt{\text{diag}(I(\hat{\theta})^{-1})}$ was applied where I($\hat{\theta}$) represents the Fisher Information Matrix. These values were then compared with the standard errors from R in the provided summary. 
+
+## Code :
+
+```{r echo=FALSE}
+task3_code <- code[102:119]
+eval(parse(text = task3_code))
+cat(task3_code, sep = "\n")
+```
+
+## Output : 
+A comparison table between the standard errors in the provided R summary and the errors from ML estimates are attached for further reference.
+```{r}
+comparison_se
+```
+
+## Observation :
+
+The standard errors derived from the ML Estimates, computed using the Fisher information matrix, align with the standard errors provided in the R summary. The values are consistent up until the 6th decimal place. This suggests that the Fisher information matrix is reliable and R is using the Fisher information method for computing the standard errors.
+
+# Task 4
+
+# Approach :
+
+Re-sample the response variable (y_boot) : In each iteration, the response variable y_boot is re-sampled based on the predicted probabilities p_hat. This re-sampling is done using a Bernoulli distribution, so the values of y_boot will vary across iterations.
+
+Bootstrap model fitting (model_boot) : In each iteration, the y_boot changes, and the logistic regression model model_boot which is fitted using y_boot varies as well. The model’s coefficients will differ slightly because the response data is changing.
+
+Bootstrap Coefficients (bootstrap_estimates) : These are the theta estimates calculated for each re-sample. The coefficients of the logistic regression model (bootstrap_estimates), obtained by fitting model_boot, change in each iteration because the model is fitted on a re-sampled version of the response variable.
+
+Predicted probabilities (p_bootstrap) : Since the model coefficients change in each iteration, the predicted probabilities, which come from *predict(model_boot, newdata = new_data, type = "response")*, will also vary for each iteration.
+
+Bootstrap Standard Errors (bootstrap_se) : The standard errors are computed for each re-sample. A comparison table summarizing the result is attached for further reference.
+
+95% Confidence Interval Construction (bootstrap_ci) : A 95% confidence interval is computed for the use case mentioned of the same age woman with a private education of their own.
+
+The sample size of bootstrap (n_bootstrap) : The number of bootstrap samples to be generated. We have chosen 10,000 for the calculation of standard errors and for the calculation of the 95% confidence interval. According to the book, when the sample size is big enough (over 10,000), the results should be very close to the estimated values from the original sample. The standard error computed with 10,000 bootstrap sample size has a more accurate prediction of the standard errors displayed in the R summary and the computed values from ML estimates.
+
+## Code :
+
+```{r echo=FALSE}
+code <- readLines("computer_assignment_1.R")
+task4_code <- code[121:183]
+eval(parse(text = task4_code))
+cat(task4_code, sep = "\n")
+```
+
+## Output : 
+A comparison table between the standard errors in the provided R summary, the errors from ML estimates and the errors from bootstrap samples are attached for further reference.
+```{r}
+comparison_se
+```
+
+The limits of the 95% bootstrap confidence interval for the probability that someone privately educated of your own age and sex is successful is attached here.
+```{r}
+bootstrap_ci
+```
+## Observation :
+
+-   The standard errors derived from the bootstrap estimates, align with the standard errors provided in the R summary and the computed Standard Errors from ML estimates. The values are consistent up until the 3th decimal place. This suggests that the bootstrap estimates are reliable.
