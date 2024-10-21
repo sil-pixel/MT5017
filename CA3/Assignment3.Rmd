@@ -29,11 +29,12 @@ $2*k - 2*l(\hat{\theta_{ml}})$
 was applied where k is the number of parameters in the theta. To calculate 
 the leave-one-out cross-validation, the formula
 
-$l(\hat{\theta_{ml}}) + \sum_{i=1}^{n} (({S_i(\theta_i)}^T)*(\hat{\theta_i} - \hat{\theta_{ml}}))$
+$\frac{\sum_{i=1}^{n} {l_i(\hat{theta_i)}}}{n}$
 
 was applied where $\hat{\theta_i}$ is $\hat{\theta_{ml}}(X_{-i})$,
-$(X_{-i})$ is one observation $(X_{i})$ is left out 
-and n is the total number of observations. 
+$(X_{-i})$ is one observation $(X_{i})$ is left out of X, $l_i(\hat{theta_i)}$ 
+is the log likelihood for the i-th left out observation and 
+n is the total number of observations. 
 These values were then compared with the AIC from R in the provided summary.
 
 ## Code :
@@ -52,17 +53,21 @@ aic_computed <- 2*k - 2*log_likelihood
 #AIC output from R summary 
 r_summary_aic <- summary(modell)$aic
 
-# Compute n*k_cv = l(theta_ml) + sum((S_i(theta_i))T*(theta_i - theta_ml))
+# Compute k_cv =sum(l_i(theta_i))/n
 # Here, theta_i = theta_ml(X_-i)
-nk_cv <- log_likelihood
+nk_cv <- 0
 for(i in 1:n) {
   X_minus_i <- X[-i, , drop=FALSE]
   y_minus_i <- y[-i, , drop=FALSE]
+  X_i <- X[i, , drop=FALSE]
+  y_i <- y[i, , drop=FALSE]
   theta_i <- NR(theta0, 3, y_minus_i, X_minus_i)
-  score <- S(theta_i, y_minus_i, X_minus_i)
-  subset_sum <- t(score) %*% (theta_i - theta_estimate)
-  nk_cv <- nk_cv + subset_sum
+  # log likelihood for i-th observation
+  log_likelihood_theta_i <- l(theta_i, y_i, X_i)
+  nk_cv <- nk_cv + log_likelihood_theta_i
 }
+
+k_cv <- nk_cv/n
 
 # Creating a comparison data frame 
 comparison_aic_values <- data.frame(
@@ -70,7 +75,6 @@ comparison_aic_values <- data.frame(
   "AIC_computed" = aic_computed,
   "2*nK_CV_computed" = 2*nk_cv
 )
-
 ```
 
 ## Output :
@@ -82,7 +86,7 @@ comparison_aic_values
 ## Observation :
 
 The computed AIC value and the AIC value from the R summary coincide in value.
-The computed nK_CV is in the same magnitude as $AIC/(-2)$ as expected. 
+The computed K_CV is in the same magnitude as $AIC/(-2n)$ as expected. 
 
 # Task 2
 
