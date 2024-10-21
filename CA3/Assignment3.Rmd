@@ -24,14 +24,14 @@ source("codes_assignment_3.R")
 
 To calculate the AIC, the formula
 
-$\text{2*k - 2*l}(\hat{\theta})$
+$2*k - 2*l(\hat{\theta_{ml}})$
 
 was applied where k is the number of parameters in the theta. To calculate 
 the leave-one-out cross-validation, the formula
 
-$l(\hat{\theta}) + \sum_{i=1}^{n} (({S_i(\theta_i)^T})*(\theta_i - \hat{\theta}))$
+$l(\hat{\theta_{ml}}) + \sum_{i=1}^{n} (({S_i(\theta_i)}^T)*(\hat{\theta_i} - \hat{\theta_{ml}}))$
 
-was applied where $\theta_i$ is $\hat{\theta}(X_{-i})$,
+was applied where $\hat{\theta_i}$ is $\hat{\theta_{ml}}(X_{-i})$,
 $(X_{-i})$ is one observation $(X_{i})$ is left out 
 and n is the total number of observations. 
 These values were then compared with the AIC from R in the provided summary.
