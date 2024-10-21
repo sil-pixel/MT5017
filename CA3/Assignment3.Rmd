@@ -1,6 +1,6 @@
 ---
 title: "Assignment Part III"
-author: "Silpa Soni Nallacheruvu (19980824-5287)"
+author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan()"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -13,17 +13,28 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r echo=FALSE}
 source("../Codes/Functions.R")
-code <- readLines("codes_assignment_3.R")
-eval(parse(text = code[6:100]))
+source("codes_assignment_3.R")
 ```
 
 # Summary
-
 
 # Task 1
 
 ## Approach :
 
+To calculate the AIC, the formula
+
+$\text{2*k - 2*l}(\hat{\theta})$
+
+was applied where k is the number of parameters in the theta. To calculate 
+the leave-one-out cross-validation, the formula
+
+$l(\hat{\theta}) + \sum_{i=1}^{n} (({S_i(\theta_i)^T})*(\theta_i - \hat{\theta}))$
+
+was applied where $\theta_i$ is $\hat{\theta}(X_{-i})$,
+$(X_{-i})$ is one observation $(X_{i})$ is left out 
+and n is the total number of observations. 
+These values were then compared with the AIC from R in the provided summary.
 
 ## Code :
 
@@ -35,15 +46,15 @@ n <- nrow(X)
 theta0 = rep(0, ncol(X))
 k <- length(theta0)
 theta_estimate <- NR(theta0, 3, y, X) 
-l <- l(theta_estimate, y, X)
-aic_computed <- 2*k - 2*l
+log_likellihood <- l(theta_estimate, y, X)
+aic_computed <- 2*k - 2*log_likellihood
 
 #AIC output from R summary 
 r_summary_aic <- summary(modell)$aic
 
 # Compute n*k_cv = l(theta_ml) + sum((S_i(theta_i))T*(theta_i - theta_ml))
 # Here, theta_i = theta_ml(X_-i)
-nk_cv <- l
+nk_cv <- log_likellihood
 for(i in 1:n) {
   X_minus_i <- X[-i, , drop=FALSE]
   y_minus_i <- y[-i, , drop=FALSE]
@@ -57,25 +68,21 @@ for(i in 1:n) {
 comparison_aic_values <- data.frame(
   "AIC_R_model" = r_summary_aic,
   "AIC_computed" = aic_computed,
-  "NKCV_computed" = -2*nk_cv
+  "NK_CV_computed" = -2*nk_cv
 )
 
 ```
 
 ## Output :
 
-
 ```{r}
-
+comparison_aic_values
 ```
 
-## Observation :
 
 # Task 2
 
 ## Approach :
-
-
 
 ## Code :
 
@@ -87,20 +94,15 @@ comparison_aic_values <- data.frame(
 
 ## Output :
 
-
-
 ```{r}
 
 ```
 
 ## Observation :
 
-
 # Task 3
 
 ## Approach :
-
-
 
 ## Code :
 
@@ -112,12 +114,8 @@ comparison_aic_values <- data.frame(
 
 ## Output :
 
-
-
 ```{r}
 
 ```
 
 ## Observation :
-
-

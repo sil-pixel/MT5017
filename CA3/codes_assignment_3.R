@@ -1,11 +1,11 @@
 
 # Call functions built in the assignment 1
-source("Codes/Functions.R")
+source("../Codes/Functions.R")
 
 
 #########################  ASSIGNMENT_3  #########################
 # Load Data
-load("proj_data.Rdata")
+load("../proj_data.Rdata")
 modell <- glm(Resultat ~ Alder + Kon + Utbildare, 
               data = data_individ, 
               family = "binomial")
@@ -23,15 +23,15 @@ n <- nrow(X)
 theta0 = rep(0, ncol(X))
 k <- length(theta0)
 theta_estimate <- NR(theta0, 3, y, X) 
-l <- l(theta_estimate, y, X)
-aic_computed <- 2*k - 2*l
+log_likellihood <- l(theta_estimate, y, X)
+aic_computed <- 2*k - 2*log_likellihood
 
 #AIC output from R summary 
 r_summary_aic <- summary(modell)$aic
 
 # Compute n*k_cv = l(theta_ml) + sum((S_i(theta_i))T*(theta_i - theta_ml))
 # Here, theta_i = theta_ml(X_-i)
-nk_cv <- l
+nk_cv <- log_likellihood
 for(i in 1:n) {
   X_minus_i <- X[-i, , drop=FALSE]
   y_minus_i <- y[-i, , drop=FALSE]
