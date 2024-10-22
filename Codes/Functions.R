@@ -69,3 +69,10 @@ NR <- function(theta0, niter, y, X) {
   
   return(theta)  # Return the final estimate
 }
+
+
+standard_error <- function(theta, y, X) {
+  I_matrix <- I(theta, X)
+  standard_error <- sqrt(diag(solve(I_matrix)))
+  return(standard_error)
+}

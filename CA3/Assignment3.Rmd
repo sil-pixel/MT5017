@@ -1,6 +1,6 @@
 ---
 title: "Assignment Part III"
-author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan(20000526-4999)"
+author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan Aldana (20000526-4999)"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -32,7 +32,7 @@ the leave-one-out cross-validation, the formula
 $\frac{\sum_{i=1}^{n} {l_i(\hat{theta_i)}}}{n}$
 
 was applied where $\hat{\theta_i}$ is $\hat{\theta_{ml}}(X_{-i})$,
-$(X_{-i})$ is one observation $(X_{i})$ is left out of X, $l_i(\hat{theta_i)}$ 
+$(X_{-i})$ is one observation $(X_{i})$ left out of X, $l_i(\hat{theta_i)}$ 
 is the log likelihood for the i-th left out observation and 
 n is the total number of observations. 
 These values were then compared with the AIC from R in the provided summary.
@@ -92,15 +92,15 @@ The computed K_CV is in the same magnitude as $AIC/(-2n)$ as expected.
 
 ## Approach :
 
-The a posteriori density combines the a priori and the likelihood of the data. For the logistic regression, we have y data, X and the parameter vector $_theta$. so the a posteriori density is proportional to:
-$P(\theta|y,X) \propto P(y|X,\theta)P(\theta) $
-where $P(\theta)$ is the a prior density and $P(y1X,\theta)$ is. the likelihood from the logistic regression model.
+The a posteriori density combines the a priori and the likelihood of the data. For the logistic regression, we have y data, X and the parameter vector $\theta$. so the a posteriori density is proportional to:
+$P(\theta|y,X) \propto P(y|X,\theta)P(\theta)$
+where $P(\theta)$ is the a prior density and $P(y|X,\theta)$ is. the likelihood from the logistic regression model.
 
 for a binary outcome, the likelihood for the logistic regression is given by the following equation:
 
 $P(y_{i}|X_{i},\theta) =  \frac{1}{(1+\exp(-X_{i}\theta)}$
 
-The a priori is Gaussian: $\theta N(0, 100I)$ so the a prior density is the following:
+The a priori is Gaussian: $\theta ~ N(0, 100I)$ so the a prior density is the following:
 $P(\theta) \propto exp(-\frac{1}{2}\theta^T(100I)^{-1}\theta)$
 
 ## Code :
@@ -127,7 +127,10 @@ testing
 ```
 
 ## Observation :
+
 Given the results obtained by the test the function works correctly.
+
+
 # Task 3
 
 ## Approach :
@@ -135,15 +138,69 @@ Given the results obtained by the test the function works correctly.
 ## Code :
 
 ```{r echo=TRUE}
+
 # ---- Task_3 ----
 
+mh_algo <- function(theta_estimate, y, X) {
+  N <- 10000 
+  theta <- matrix(nrow = N, ncol = 4)
+  # initial value as the calculated theta_estimate
+  theta[1,] <- theta_estimate 
+  # here, suggested sigma as standard error from part II
+  sigma <- standard_error(theta_estimate, y, X) 
+  for (i in 2:N) {
+    theta_star <- theta[i-1,] + rnorm(4) * sigma
+    # check if the acceptance probability is greater than the acceptance ratio
+    posterior_theta_star <- post(theta_star, y, X) 
+    posterior_theta <- post(theta[i-1,], y, X)
+    ratio <- runif(1)
+    if (posterior_theta_star/ posterior_theta > ratio) {
+      theta[i,] <- theta_star  # Accept the proposal
+    } else {
+      theta[i,] <- theta[i-1,]  # Reject the proposal
+    }
+  }
+  return(theta)
+}
 
+theta_sample <- mh_algo(theta_estimate, y, X)
 ```
 
 ## Output :
 
-```{r}
+Parameter Plots
 
+```{r fig.show='hold', fig.align='center', fig.width=10, fig.height=6}
+par(mfrow=c(2,2))
+plot(x = c(1:10000), y = theta_sample[,1], type = "l", col = "black",
+main="theta1 Parameter Plot", xlab= "#iterations", ylab = "theta1") 
+
+plot(x = c(1:10000), y = theta_sample[,2], type = "l", col = "black", 
+main="theta2 Parameter Plot", xlab= "#iterations", ylab = "theta2") 
+
+plot(x = c(1:10000), y = theta_sample[,3], type = "l", col = "black", 
+main="theta3 Parameter Plot", xlab= "#iterations", ylab = "theta3") 
+
+plot(x = c(1:10000), y = theta_sample[,4], type = "l", col = "black", 
+main="theta4 Parameter Plot", xlab= "#iterations", ylab = "theta4") 
 ```
+
+Parameter Posteriors Histograms 
+
+```{r fig.show='hold', fig.align='center', fig.width=6, fig.height=10}
+par(mfrow=c(2,2))
+hist(x = theta_sample[(1:10000), 1], col = "lightgray",
+main="theta1 Posterior Histogram", xlab= "theta1", ylab = "frequency") 
+
+hist(x = theta_sample[(1:10000), 2],  col = "lightgray", 
+main="theta2 Posterior Histogram", xlab= "theta2", ylab = "frequency") 
+
+hist(x = theta_sample[(1:10000), 3], col = "lightgray", 
+main="theta3 Posterior Histogram", xlab= "theta3", ylab = "frequency") 
+
+hist(x = theta_sample[(1:10000), 4], col = "lightgray", 
+main="theta4 Posterior Histogram", xlab= "theta4", ylab = "frequency") 
+```
+
 
 ## Observation :

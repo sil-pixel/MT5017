@@ -54,6 +54,35 @@ comparison_aic_values <- data.frame(
 
 # ---- Task_2 ----
 
+post <- function(theta, y, X) {
+  eta <- X %*% theta # Logistic regression likelihood
+  likelihood <- prod(plogis(eta)^y * (1 - plogis(eta))^(1 - y))
+  prior <- exp(-0.5 * sum(theta^2 / 100)) # a priori with theta ~ N(0, 100 * I)
+  posterior <- likelihood * prior # posteriori is proportional to a priori * likelihood
+  return(posterior)
+}
 
 # ---- Task_3 ----
+
+mh_algo <- function(theta_estimate, y, X) {
+  N <- 10000 
+  theta <- matrix(nrow = N, ncol = 4)
+  theta[1,] <- theta_estimate # initial value
+  sigma <- standard_error(theta_estimate, y, X) # suggested sigma as standard error
+  for (i in 2:N) {
+    theta_star <- theta[i-1,] + rnorm(4) * sigma
+    # check if the acceptance probability is greater than the acceptance ratio
+    posterior_theta_star <- post(theta_star, y, X) 
+    posterior_theta <- post(theta[i-1,], y, X)
+    ratio <- runif(1)
+    if (posterior_theta_star/ posterior_theta > ratio) {
+      theta[i,] <- theta_star  # Accept the proposal
+    } else {
+      theta[i,] <- theta[i-1,]  # Reject the proposal
+    }
+  }
+  return(theta)
+}
+
+theta_sample <- mh_algo(theta_estimate, y, X)
 
