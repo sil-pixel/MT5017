@@ -18,6 +18,15 @@ source("codes_assignment_3.R")
 
 # Summary
 
+This report covers three main tasks under a Bayesian framework applied to 
+logistic regression modeling. Task 1 focuses on validating AIC calculations and leave-one-out cross-validation to assess model accuracy. Task 2 involves 
+implementing a function to compute the posterior density of regression 
+parameters, enhancing the model’s estimation under Bayesian principles.
+Task 3 is dedicated to applying the Metropolis-Hastings algorithm for 
+posterior sampling, aiming to simulate from the posterior distribution of 
+parameters, assess convergence, and estimate credibility intervals 
+and predictive probabilities for new observations.
+
 # Task 1
 
 ## Approach :
@@ -26,16 +35,11 @@ To calculate the AIC, the formula
 
 $2*k - 2*l(\hat{\theta_{ml}})$
 
-was applied where k is the number of parameters in the theta. To calculate 
-the leave-one-out cross-validation, the formula
+was applied where k is the number of parameters in the theta. To calculate the leave-one-out cross-validation, the formula
 
 $\frac{\sum_{i=1}^{n} {l_i(\hat{theta_i)}}}{n}$
 
-was applied where $\hat{\theta_i}$ is $\hat{\theta_{ml}}(X_{-i})$,
-$(X_{-i})$ is one observation $(X_{i})$ left out of X, $l_i(\hat{theta_i)}$ 
-is the log likelihood for the i-th left out observation and 
-n is the total number of observations. 
-These values were then compared with the AIC from R in the provided summary.
+was applied where $\hat{\theta_i}$ is $\hat{\theta_{ml}}(X_{-i})$, $(X_{-i})$ is one observation $(X_{i})$ left out of X, $l_i(\hat{theta_i)}$ is the log likelihood for the i-th left out observation and n is the total number of observations. These values were then compared with the AIC from R in the provided summary.
 
 ## Code :
 
@@ -85,23 +89,19 @@ comparison_aic_values
 
 ## Observation :
 
-The computed AIC value and the AIC value from the R summary coincide in value.
-The computed K_CV is in the same magnitude as $AIC/(-2n)$ as expected. 
+The computed AIC value and the AIC value from the R summary coincide in value. The computed K_CV is in the same magnitude as $AIC/(-2n)$ as expected.
 
 # Task 2
 
 ## Approach :
 
-The a posteriori density combines the a priori and the likelihood of the data. For the logistic regression, we have y data, X and the parameter vector $\theta$. so the a posteriori density is proportional to:
-$P(\theta|y,X) \propto P(y|X,\theta)P(\theta)$
-where $P(\theta)$ is the a prior density and $P(y|X,\theta)$ is. the likelihood from the logistic regression model.
+The a posteriori density combines the a priori and the likelihood of the data. For the logistic regression, we have y data, X and the parameter vector $\theta$. so the a posteriori density is proportional to: $P(\theta|y,X) \propto P(y|X,\theta)P(\theta)$ where $P(\theta)$ is the a prior density and $P(y|X,\theta)$ is. the likelihood from the logistic regression model.
 
 for a binary outcome, the likelihood for the logistic regression is given by the following equation:
 
 $P(y_{i}|X_{i},\theta) =  \frac{1}{(1+\exp(-X_{i}\theta)}$
 
-The a priori is Gaussian: $\theta ~ N(0, 100I)$ so the a prior density is the following:
-$P(\theta) \propto exp(-\frac{1}{2}\theta^T(100I)^{-1}\theta)$
+The a priori is Gaussian: $\theta \sim N(0, 100I)$ so the a prior density is the following: $P(\theta) \propto exp(-\frac{1}{2}\theta^T(100I)^{-1}\theta)$
 
 ## Code :
 
@@ -130,10 +130,14 @@ testing
 
 Given the results obtained by the test the function works correctly.
 
-
 # Task 3
 
 ## Approach :
+
+Implemented the Metropolis-Hastings algorithm over 10000 iterations while
+checking on the condition if the acceptance probability is greater than 
+the acceptance ratio which is generated randomly as $ratio \sim U(0,1)$. 
+We accepted the theta proposal if the condition was true.
 
 ## Code :
 
@@ -168,7 +172,7 @@ theta_sample <- mh_algo(theta_estimate, y, X)
 
 ## Output :
 
-Parameter Plots
+### Parameter Plots
 
 ```{r fig.show='hold', fig.align='center', fig.width=10, fig.height=6}
 par(mfrow=c(2,2))
@@ -185,9 +189,9 @@ plot(x = c(1:10000), y = theta_sample[,4], type = "l", col = "black",
 main="theta4 Parameter Plot", xlab= "#iterations", ylab = "theta4") 
 ```
 
-Parameter Posteriors Histograms 
+### Parameter Posteriors Histograms
 
-```{r fig.show='hold', fig.align='center', fig.width=6, fig.height=10}
+```{r fig.show='hold', fig.align='center', fig.width=6, fig.height=8}
 par(mfrow=c(2,2))
 hist(x = theta_sample[(1:10000), 1], col = "lightgray",
 main="theta1 Posterior Histogram", xlab= "theta1", ylab = "frequency") 
@@ -202,12 +206,41 @@ hist(x = theta_sample[(1:10000), 4], col = "lightgray",
 main="theta4 Posterior Histogram", xlab= "theta4", ylab = "frequency") 
 ```
 
-95% credibility intervals 
+### 95% credibility intervals
+
 ```{r}
 c_i <- apply(theta_sample, 2, quantile, probs = c(0.025, 0.975))
 print(t(c_i))
-#frequentist 95% ci:
-frequentist_ci <- cbind(theta_estimate- 1.96 * standard_error(theta_estimate, y, X), theta_estimate + 1.96 * standard_error(theta_estimate, y, X))
-print(frequentist_ci
+
+# frequentist 95% ci:
+frequentist_ci <- cbind(theta_estimate- 1.96 * standard_error(theta_estimate, y, X),
+                        theta_estimate + 1.96 * standard_error(theta_estimate, y, X))
+print(frequentist_ci)
 ```
-## Observation :
+
+### Future Test
+
+Used the formula : $p(x^*) = \frac{1}{1 + \exp(-\beta^T x^*)}$
+
+
+
+```{r warning=FALSE}
+# a privately educated subject of your own sex and age.
+# intercept = 1 
+# Alder = 26    # Own age
+# KonMan = 0    # Female
+# Utbildare = 0 # Privately educated
+X_star <- c(1, 26, 0, 0)
+# model the probability using regression framework
+p_x <- function(theta, x) {
+  return (1 / (1 + exp(-t(theta)*x)))
+}
+# compute the probability of pass wrt X_star
+prob_y <- rep(0, 10000)
+for(i in 1:10000) {
+  theta <- theta_sample[i, ]
+  prob_y[i] <- p_x(theta, X_star)
+}
+expected_prob_y <- mean(prob_y)
+cat("expected probability of y* : ", expected_prob_y)
+```
