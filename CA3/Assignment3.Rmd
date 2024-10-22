@@ -202,5 +202,12 @@ hist(x = theta_sample[(1:10000), 4], col = "lightgray",
 main="theta4 Posterior Histogram", xlab= "theta4", ylab = "frequency") 
 ```
 
-
+95% credibility intervals 
+```{r}
+c_i <- apply(theta_sample, 2, quantile, probs = c(0.025, 0.975))
+print(t(c_i))
+#frequentist 95% ci:
+frequentist_ci <- cbind(theta_estimate- 1.96 * standard_error(theta_estimate, y, X), theta_estimate + 1.96 * standard_error(theta_estimate, y, X))
+print(frequentist_ci
+```
 ## Observation :
