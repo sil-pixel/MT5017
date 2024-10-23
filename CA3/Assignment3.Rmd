@@ -220,7 +220,16 @@ print(frequentist_ci)
 
 ### Future Test
 
-Used the formula : $p(x^*) = \frac{1}{1 + \exp(-\beta^T x^*)}$
+We calculate the conditional probability of success as $(P(Y^* = 1 \mid y) = E(p(x^*) \mid y))$, where $(x^*)$ represents the features of the specific observation as 
+mentioned. 
+
+Here, $p(x^*)$ is a function of random variable $\theta$. 
+Used the logistic formula : $p(x^*, \theta) = \frac{1}{1 + \exp(-\theta^T x^*)}$
+
+Hence, $E(p(x^*, \theta) \mid y))$ is calculated using Monte Carlo Integration 
+by the sample mean $\frac{1}{N} \sum_{i=1}^N p(\theta_i, x^*)$ 
+for N = 10000 samples and $\theta_i$ as i-th sample from theta estimate 
+of MH algorithm.
 
 
 
