@@ -61,6 +61,7 @@ r_summary_aic <- summary(modell)$aic
 # Here, theta_i = theta_ml(X_-i)
 nk_cv <- 0
 for(i in 1:n) {
+  # remove the i-th row from X and return a matrix
   X_minus_i <- X[-i, , drop=FALSE]
   y_minus_i <- y[-i, , drop=FALSE]
   X_i <- X[i, , drop=FALSE]
@@ -137,7 +138,11 @@ Given the results obtained by the test the function works correctly.
 Implemented the Metropolis-Hastings algorithm over 10000 iterations while
 checking on the condition if the acceptance probability is greater than 
 the acceptance ratio which is generated randomly as $ratio \sim U(0,1)$. 
-We accepted the theta proposal if the condition was true.
+We accepted the theta proposal if the condition was true. 
+The acceptance probability is the ratio of the densities of the proposal
+distribution of $\theta^\star$ and $\theta^{t-1}$.
+The proposal distribution here is the previously computed 
+posterior distribution.
 
 ## Code :
 
@@ -157,11 +162,12 @@ mh_algo <- function(theta_estimate, y, X) {
     # check if the acceptance probability is greater than the acceptance ratio
     posterior_theta_star <- post(theta_star, y, X) 
     posterior_theta <- post(theta[i-1,], y, X)
-    ratio <- runif(1)
-    if (posterior_theta_star/ posterior_theta > ratio) {
+    u <- runif(1)
+    acceptance_probability <- min(1, posterior_theta_star/ posterior_theta)
+    if (posterior_theta_star/ posterior_theta >= u) {
       theta[i,] <- theta_star  # Accept the proposal
     } else {
-      theta[i,] <- theta[i-1,]  # Reject the proposal
+      theta[i,] <- theta[i-1,]  # Reject the proposal and fall back
     }
   }
   return(theta)
@@ -233,21 +239,21 @@ of MH algorithm.
 
 
 
-```{r warning=FALSE}
+```{r}
 # a privately educated subject of your own sex and age.
 # intercept = 1 
 # Alder = 26    # Own age
 # KonMan = 0    # Female
 # Utbildare = 0 # Privately educated
-X_star <- c(1, 26, 0, 0)
+X_star <- matrix(c(1, 26, 0, 0), nrow = 4, ncol = 1)
 # model the probability using regression framework
 p_x <- function(theta, x) {
-  return (1 / (1 + exp(-t(theta)*x)))
+  return (1 / (1 + exp(theta %*% x)))
 }
 # compute the probability of pass wrt X_star
 prob_y <- rep(0, 10000)
 for(i in 1:10000) {
-  theta <- theta_sample[i, ]
+  theta <- theta_sample[i, , drop=FALSE]
   prob_y[i] <- p_x(theta, X_star)
 }
 expected_prob_y <- mean(prob_y)
